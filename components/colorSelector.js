@@ -10,7 +10,6 @@ const TOOL_BUTTONS = [
 
 export default function ColorSelector({ colorSelected, selectColor, usedColors, canAddNewColor, canUndo, onUndo }) {
 
-    const colors = colorPalette.map(color => color.value)
     const isDisabled = color => !canAddNewColor && !usedColors.includes(color)
 
     return (
@@ -25,9 +24,9 @@ export default function ColorSelector({ colorSelected, selectColor, usedColors, 
                     </button>
                 ))}
             </div>
-            {colors.map((color, index) => {
-                return <button key={index} className={color === colorSelected ? styles.buttonSelected : styles.button} style={{ backgroundColor: color }} disabled={isDisabled(color)} onClick={() => selectColor(color)}></button>
-            })}
+            {colorPalette.map(({ value, name }) => (
+                <button key={value} className={value === colorSelected ? styles.buttonSelected : styles.button} style={{ backgroundColor: value }} disabled={isDisabled(value)} aria-label={name} title={name} aria-pressed={value === colorSelected} onClick={() => selectColor(value)}></button>
+            ))}
         </div>
     )
 

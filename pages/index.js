@@ -11,6 +11,7 @@ import styles from '../styles/Home.module.css'
 import stateLib from '../lib/states'
 import colorPalette from '../lib/colors'
 import { TOOLS } from '../lib/tools'
+import { loadPuzzle, savePuzzle, clearPuzzle } from '../lib/storage'
 
 const CANCEL_DELAY_MS = 5000
 const UNDO_LIMIT = 20
@@ -32,6 +33,7 @@ export default function Home() {
   const [pageStatus, setPageStatus] = useState(PAGE_STATUSES.NUMBER_INPUT)
   const [isSolving, setIsSolving] = useState(false)
   const [canCancel, setCanCancel] = useState(false)
+  const [hasRestored, setHasRestored] = useState(false)
   const workerRef = useRef(null)
   const cancelTimerRef = useRef(null)
 
@@ -39,6 +41,35 @@ export default function Home() {
     workerRef.current?.terminate()
     clearTimeout(cancelTimerRef.current)
   }, [])
+
+  // The page is prerendered, so the saved puzzle can only be read after mounting
+  useEffect(() => {
+    const saved = loadPuzzle()
+    if (saved) {
+      setTotalNumber(saved.total)
+      setEmptyNumber(saved.empty)
+      setTubes(saved.tubes)
+      setColor(saved.selection)
+      setPageStatus(saved.screen === 'colors' ? PAGE_STATUSES.COLOR_INPUT : PAGE_STATUSES.NUMBER_INPUT)
+    }
+    setHasRestored(true)
+  }, [])
+
+  // Solution screens are not saved: after a reload the user lands on the fill-tubes screen
+  useEffect(() => {
+    if (!hasRestored) return
+    if (totalNumber === '') {
+      clearPuzzle()
+      return
+    }
+    savePuzzle({
+      screen: pageStatus === PAGE_STATUSES.NUMBER_INPUT ? 'config' : 'colors',
+      total: totalNumber,
+      empty: emptyNumber,
+      tubes,
+      selection: color
+    })
+  }, [hasRestored, pageStatus, totalNumber, emptyNumber, tubes, color])
 
 
   const setNumberOfTubes = function (total, empty) {
@@ -126,7 +157,7 @@ export default function Home() {
     </div>
   )
 
-  function PageComponent() {
+  const renderScreen = function () {
     switch (pageStatus) {
       case PAGE_STATUSES.NUMBER_INPUT:
         return (
@@ -137,7 +168,7 @@ export default function Home() {
               height={100}
             ></Image>
             <h1>Configure game settings</h1>
-            <Selector onClick={setNumberOfTubes} initialTotal={totalNumber} initialEmpty={emptyNumber} />
+            <Selector key={`${totalNumber}-${emptyNumber}`} onClick={setNumberOfTubes} initialTotal={totalNumber} initialEmpty={emptyNumber} />
           </>
         )
       case PAGE_STATUSES.COLOR_INPUT:
@@ -191,7 +222,7 @@ export default function Home() {
       />
 
       <main className={styles.main}>
-        <PageComponent />
+        {renderScreen()}
       </main>
     </div>
   )
