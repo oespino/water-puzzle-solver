@@ -106,8 +106,6 @@ export default function Home() {
       <Head>
         <title>Water Sort Puzzle Solver</title>
         <meta name="description" content="Webapp to solve these tricky puzzles and laught at your friends" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" />
-        <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
         <link rel="icon" href="/logo.webp" />
       </Head>
 
