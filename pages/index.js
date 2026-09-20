@@ -10,6 +10,7 @@ import Seo from '../components/seo'
 import styles from '../styles/Home.module.css'
 import stateLib from '../lib/states'
 import colorPalette from '../lib/colors'
+import { TOOLS } from '../lib/tools'
 
 const CANCEL_DELAY_MS = 5000
 
@@ -22,8 +23,9 @@ export default function Home() {
   }
   const [totalNumber, setTotalNumber] = useState('')
   const [emptyNumber, setEmptyNumber] = useState('')
-  const [color, setColor] = useState("black")
+  const [color, setColor] = useState(TOOLS.REMOVE)
   const [tubes, setTubes] = useState([])
+  const [undoSnapshot, setUndoSnapshot] = useState(null)
   const [history, setHistory] = useState([])
   const [pageStatus, setPageStatus] = useState(PAGE_STATUSES.NUMBER_INPUT)
   const [isSolving, setIsSolving] = useState(false)
@@ -45,17 +47,31 @@ export default function Home() {
       localTubes.push([])
     }
     setTubes(localTubes)
+    setUndoSnapshot(null)
     setPageStatus(PAGE_STATUSES.COLOR_INPUT)
   }
 
-  const handleClick = function (index, color) {
-    let tubesCopy = tubes.slice()
-    if (color !== "black") {
-      if (tubesCopy[index].length < 4) tubesCopy[index].push(color)
+  const handleClick = function (index, selection) {
+    const tubesCopy = stateLib.deepCopy(tubes)
+    const tube = tubesCopy[index]
+    if (selection === TOOLS.REMOVE) {
+      if (!tube.length) return
+      tube.pop()
+    } else if (selection === TOOLS.EMPTY) {
+      if (!tube.length) return
+      tube.length = 0
     } else {
-      tubesCopy[index].pop()
+      const isColorAllowed = validation.canAddNewColor || validation.usedColors.includes(selection)
+      if (tube.length >= 4 || !isColorAllowed) return
+      tube.push(selection)
     }
+    setUndoSnapshot(tubes)
     setTubes(tubesCopy)
+  }
+
+  const undo = function () {
+    setTubes(undoSnapshot)
+    setUndoSnapshot(null)
   }
 
   const stopSolving = function () {
@@ -112,7 +128,7 @@ export default function Home() {
               <h1>Use the colors to fill the tubes until they look like your puzzle</h1>
             </div>
             <State tubes={tubes} numberOfReadOnly={emptyNumber} colorSelected={color} onClick={handleClick} />
-            <ColorSelector colorSelected={color} selectColor={setColor} usedColors={validation.usedColors} canAddNewColor={validation.canAddNewColor} />
+            <ColorSelector colorSelected={color} selectColor={setColor} usedColors={validation.usedColors} canAddNewColor={validation.canAddNewColor} canUndo={!!undoSnapshot} onUndo={undo} />
             {!validation.canAddNewColor && validation.usedColors.length < colorPalette.length && <p className={styles.centeredText}>All {validation.numberOfColors} colors are in use. The other colors are disabled.</p>}
             {!validation.isValid && <ConfigIssues id="config-issues" wrongColors={validation.wrongColors} incompleteTubes={validation.incompleteTubes} />}
             {isSolving
