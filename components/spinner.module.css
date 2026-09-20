@@ -1,0 +1,40 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 63px;
+  font-size: x-large;
+  font-weight: bold;
+  animation: appear 0.2s ease 0.3s both;
+}
+
+.circle {
+  width: 40px;
+  height: 40px;
+  border: 5px solid #444;
+  border-top-color: gold;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .circle {
+    animation-duration: 2.5s;
+  }
+}

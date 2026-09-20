@@ -6,8 +6,10 @@ import Solution from '../components/solution'
 import Selector from '../components/selector'
 import ColorSelector from '../components/colorSelector'
 import ConfigIssues from '../components/configIssues'
+import Spinner from '../components/spinner'
 import styles from '../styles/Home.module.css'
 import stateLib from '../lib/states'
+import colorPalette from '../lib/colors'
 
 export default function Home() {
   const PAGE_STATUSES = {
@@ -22,6 +24,7 @@ export default function Home() {
   const [tubes, setTubes] = useState([])
   const [history, setHistory] = useState([])
   const [pageStatus, setPageStatus] = useState(PAGE_STATUSES.NUMBER_INPUT)
+  const [isSolving, setIsSolving] = useState(false)
 
 
   const setNumberOfTubes = function (totalNumber, emptyNumber) {
@@ -46,15 +49,23 @@ export default function Home() {
   }
 
   const solvePuzzle = function () {
-    let historyLocal = []
-    historyLocal.push(tubes)
-    stateLib.resolve(historyLocal)
-    if (!historyLocal.length) {
-      setPageStatus(PAGE_STATUSES.SOLUTION_NOT_FOUND)
-    } else {
-      setHistory(historyLocal)
-      setPageStatus(PAGE_STATUSES.SOLUTION_OUTPUT)
-    }
+    setIsSolving(true)
+    // The solver blocks the main thread, so wait for a frame to be painted with the spinner first
+    requestAnimationFrame(() => setTimeout(() => {
+      try {
+        let historyLocal = []
+        historyLocal.push(tubes)
+        stateLib.resolve(historyLocal)
+        if (!historyLocal.length) {
+          setPageStatus(PAGE_STATUSES.SOLUTION_NOT_FOUND)
+        } else {
+          setHistory(historyLocal)
+          setPageStatus(PAGE_STATUSES.SOLUTION_OUTPUT)
+        }
+      } finally {
+        setIsSolving(false)
+      }
+    }))
   }
 
   const backToStart = function () {
@@ -85,9 +96,11 @@ export default function Home() {
             </div>
             <State tubes={tubes} numberOfReadOnly={emptyNumber} colorSelected={color} onClick={handleClick} />
             <ColorSelector colorSelected={color} selectColor={setColor} usedColors={validation.usedColors} canAddNewColor={validation.canAddNewColor} />
-            {!validation.canAddNewColor && <p className={styles.centeredText}>All {validation.numberOfColors} colors are in use. The other colors are disabled.</p>}
+            {!validation.canAddNewColor && validation.usedColors.length < colorPalette.length && <p className={styles.centeredText}>All {validation.numberOfColors} colors are in use. The other colors are disabled.</p>}
             {!validation.isValid && <ConfigIssues id="config-issues" wrongColors={validation.wrongColors} incompleteTubes={validation.incompleteTubes} />}
-            <button className={styles.button} disabled={!validation.isValid} aria-describedby={validation.isValid ? undefined : "config-issues"} onClick={solvePuzzle}>SOLVE</button>
+            {isSolving
+              ? <Spinner label="Solving..." />
+              : <button className={styles.button} disabled={!validation.isValid} aria-describedby={validation.isValid ? undefined : "config-issues"} onClick={solvePuzzle}>SOLVE</button>}
           </>
         )
       case PAGE_STATUSES.SOLUTION_OUTPUT:
