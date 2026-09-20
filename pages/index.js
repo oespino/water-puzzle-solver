@@ -10,8 +10,10 @@ import Seo from '../components/seo'
 import styles from '../styles/Home.module.css'
 import stateLib from '../lib/states'
 import colorPalette from '../lib/colors'
+import { TOOLS } from '../lib/tools'
 
 const CANCEL_DELAY_MS = 5000
+const UNDO_LIMIT = 20
 
 export default function Home() {
   const PAGE_STATUSES = {
@@ -22,8 +24,9 @@ export default function Home() {
   }
   const [totalNumber, setTotalNumber] = useState('')
   const [emptyNumber, setEmptyNumber] = useState('')
-  const [color, setColor] = useState("black")
+  const [color, setColor] = useState(TOOLS.REMOVE)
   const [tubes, setTubes] = useState([])
+  const [undoStack, setUndoStack] = useState([])
   const [history, setHistory] = useState([])
   const [pageStatus, setPageStatus] = useState(PAGE_STATUSES.NUMBER_INPUT)
   const [isSolving, setIsSolving] = useState(false)
@@ -37,25 +40,38 @@ export default function Home() {
   }, [])
 
 
-  const setNumberOfTubes = function (totalNumber, emptyNumber) {
-    setTotalNumber(totalNumber)
-    setEmptyNumber(emptyNumber)
-    const localTubes = []
-    for (let i = 0; i < totalNumber; i++) {
-      localTubes.push([])
+  const setNumberOfTubes = function (total, empty) {
+    const isUnchanged = total === totalNumber && empty === emptyNumber && tubes.length === total
+    setTotalNumber(total)
+    setEmptyNumber(empty)
+    if (!isUnchanged) {
+      setTubes(Array.from({ length: total }, () => []))
+      setUndoStack([])
     }
-    setTubes(localTubes)
     setPageStatus(PAGE_STATUSES.COLOR_INPUT)
   }
 
-  const handleClick = function (index, color) {
-    let tubesCopy = tubes.slice()
-    if (color !== "black") {
-      if (tubesCopy[index].length < 4) tubesCopy[index].push(color)
+  const handleClick = function (index, selection) {
+    const tubesCopy = stateLib.deepCopy(tubes)
+    const tube = tubesCopy[index]
+    if (selection === TOOLS.REMOVE) {
+      if (!tube.length) return
+      tube.pop()
+    } else if (selection === TOOLS.EMPTY) {
+      if (!tube.length) return
+      tube.length = 0
     } else {
-      tubesCopy[index].pop()
+      const isColorAllowed = validation.canAddNewColor || validation.usedColors.includes(selection)
+      if (tube.length >= 4 || !isColorAllowed) return
+      tube.push(selection)
     }
+    setUndoStack([...undoStack, tubes].slice(-UNDO_LIMIT))
     setTubes(tubesCopy)
+  }
+
+  const undo = function () {
+    setTubes(undoStack[undoStack.length - 1])
+    setUndoStack(undoStack.slice(0, -1))
   }
 
   const stopSolving = function () {
@@ -85,11 +101,29 @@ export default function Home() {
     worker.postMessage(tubes)
   }
 
-  const backToStart = function () {
+  const backToColors = function () {
     setPageStatus(PAGE_STATUSES.COLOR_INPUT)
   }
 
+  const backToConfig = function () {
+    setPageStatus(PAGE_STATUSES.NUMBER_INPUT)
+  }
+
+  const newLevel = function () {
+    setTubes([])
+    setUndoStack([])
+    setColor(TOOLS.REMOVE)
+    setPageStatus(PAGE_STATUSES.NUMBER_INPUT)
+  }
+
   const validation = stateLib.validateConfiguration(tubes, emptyNumber)
+
+  const endButtons = (
+    <div className={styles.navButtons}>
+      <button className={styles.secondaryButton} onClick={backToColors}>BACK</button>
+      <button className={styles.button} onClick={newLevel}>NEW LEVEL</button>
+    </div>
+  )
 
   function PageComponent() {
     switch (pageStatus) {
@@ -102,7 +136,7 @@ export default function Home() {
               height={100}
             ></Image>
             <h1>Configure game settings</h1>
-            <Selector onClick={setNumberOfTubes} />
+            <Selector onClick={setNumberOfTubes} initialTotal={totalNumber} initialEmpty={emptyNumber} />
           </>
         )
       case PAGE_STATUSES.COLOR_INPUT:
@@ -112,26 +146,31 @@ export default function Home() {
               <h1>Use the colors to fill the tubes until they look like your puzzle</h1>
             </div>
             <State tubes={tubes} numberOfReadOnly={emptyNumber} colorSelected={color} onClick={handleClick} />
-            <ColorSelector colorSelected={color} selectColor={setColor} usedColors={validation.usedColors} canAddNewColor={validation.canAddNewColor} />
+            <ColorSelector colorSelected={color} selectColor={setColor} usedColors={validation.usedColors} canAddNewColor={validation.canAddNewColor} canUndo={undoStack.length > 0} onUndo={undo} />
             {!validation.canAddNewColor && validation.usedColors.length < colorPalette.length && <p className={styles.centeredText}>All {validation.numberOfColors} colors are in use. The other colors are disabled.</p>}
             {!validation.isValid && <ConfigIssues id="config-issues" wrongColors={validation.wrongColors} incompleteTubes={validation.incompleteTubes} />}
             {isSolving
               ? <Spinner label="Solving..." onCancel={canCancel ? stopSolving : undefined} />
-              : <button className={styles.button} disabled={!validation.isValid} aria-describedby={validation.isValid ? undefined : "config-issues"} onClick={solvePuzzle}>SOLVE</button>}
+              : (
+                <div className={styles.navButtons}>
+                  <button className={styles.secondaryButton} onClick={backToConfig}>BACK</button>
+                  <button className={styles.button} disabled={!validation.isValid} aria-describedby={validation.isValid ? undefined : "config-issues"} onClick={solvePuzzle}>SOLVE</button>
+                </div>
+              )}
           </>
         )
       case PAGE_STATUSES.SOLUTION_OUTPUT:
         return (
           <>
             <Solution history={history} />
-            <button className={styles.button} onClick={() => backToStart()}>CLOSE</button>
+            {endButtons}
           </>
         )
       case PAGE_STATUSES.SOLUTION_NOT_FOUND:
         return (
           <>
             <h2 className={styles.centeredText}>Solution not found. Check your colors.</h2>
-            <button className={styles.button} onClick={() => backToStart()}>BACK</button>
+            {endButtons}
           </>
         )
     }

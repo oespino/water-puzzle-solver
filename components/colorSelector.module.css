@@ -5,6 +5,13 @@
   margin: 20px;
 }
 
+.tools {
+  display: flex;
+  justify-content: center;
+  flex-basis: 100%;
+  margin-bottom: 8px;
+}
+
 .button {
   width: 45px;
   height: 45px;
@@ -14,6 +21,10 @@
 .button:disabled {
   opacity: 0.2;
   cursor: not-allowed;
+}
+
+.undo {
+  margin-right: 20px;
 }
 
 .buttonSelected {
