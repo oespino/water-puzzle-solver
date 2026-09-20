@@ -81,7 +81,7 @@ export default function Home() {
         return (
           <>
             <div className={styles.colorSelectionContainer} >
-              <h1>Use colors to fill tubes until they looks like in your puzzle</h1>
+              <h1>Use the colors to fill the tubes until they look like your puzzle</h1>
             </div>
             <State tubes={tubes} numberOfReadOnly={emptyNumber} colorSelected={color} onClick={handleClick} />
             <ColorSelector colorSelected={color} selectColor={setColor} />
@@ -99,8 +99,8 @@ export default function Home() {
       case PAGE_STATUSES.SOLUTION_NOT_FOUND:
         return (
           <>
-            <h2 className={styles.centeredText}>Solusion's not found. Check your colors</h2>
-            <button className={styles.button} onClick={() => backToStart()}>VOLVER</button>
+            <h2 className={styles.centeredText}>Solution not found. Check your colors.</h2>
+            <button className={styles.button} onClick={() => backToStart()}>BACK</button>
           </>
         )
     }
@@ -109,7 +109,7 @@ export default function Home() {
     <div className={styles.container}>
       <Head>
         <title>Water Sort Puzzle Solver</title>
-        <meta name="description" content="Webapp to solve these tricky puzzles and laught at your friends" />
+        <meta name="description" content="Web app to solve these tricky puzzles and laugh at your friends" />
         <link rel="icon" href="/logo.webp" />
       </Head>
 

@@ -12,10 +12,10 @@ export default function Selector({ onClick }) {
 
     return (
         <div>
-            <span>How many tubes in total you have</span>
+            <span>How many tubes do you have in total?</span>
             <input type='text' className={styles.input} onChange={event => setTotalNumber(event.target.value)} ></input>
             <br />
-            <span>How many emtpy tubes you have</span>
+            <span>How many empty tubes do you have?</span>
             <input type='text' className={styles.input} onChange={event => setEmptyNumber(event.target.value)}></input>
             <br />
             <div className={styles.buttonContainer}>
