@@ -11,6 +11,8 @@ import styles from '../styles/Home.module.css'
 import stateLib from '../lib/states'
 import colorPalette from '../lib/colors'
 
+const CANCEL_DELAY_MS = 5000
+
 export default function Home() {
   const PAGE_STATUSES = {
     NUMBER_INPUT: 0,
@@ -25,9 +27,14 @@ export default function Home() {
   const [history, setHistory] = useState([])
   const [pageStatus, setPageStatus] = useState(PAGE_STATUSES.NUMBER_INPUT)
   const [isSolving, setIsSolving] = useState(false)
+  const [canCancel, setCanCancel] = useState(false)
   const workerRef = useRef(null)
+  const cancelTimerRef = useRef(null)
 
-  useEffect(() => () => workerRef.current?.terminate(), [])
+  useEffect(() => () => {
+    workerRef.current?.terminate()
+    clearTimeout(cancelTimerRef.current)
+  }, [])
 
 
   const setNumberOfTubes = function (totalNumber, emptyNumber) {
@@ -51,15 +58,19 @@ export default function Home() {
     setTubes(tubesCopy)
   }
 
+  const stopSolving = function () {
+    workerRef.current?.terminate()
+    workerRef.current = null
+    clearTimeout(cancelTimerRef.current)
+    setIsSolving(false)
+    setCanCancel(false)
+  }
+
   const solvePuzzle = function () {
     setIsSolving(true)
+    cancelTimerRef.current = setTimeout(() => setCanCancel(true), CANCEL_DELAY_MS)
     const worker = new Worker(new URL('../lib/solver.worker.js', import.meta.url))
     workerRef.current = worker
-    const finish = () => {
-      worker.terminate()
-      workerRef.current = null
-      setIsSolving(false)
-    }
     worker.onmessage = (event) => {
       const historyLocal = event.data
       if (!historyLocal.length) {
@@ -68,9 +79,9 @@ export default function Home() {
         setHistory(historyLocal)
         setPageStatus(PAGE_STATUSES.SOLUTION_OUTPUT)
       }
-      finish()
+      stopSolving()
     }
-    worker.onerror = finish
+    worker.onerror = stopSolving
     worker.postMessage(tubes)
   }
 
@@ -105,7 +116,7 @@ export default function Home() {
             {!validation.canAddNewColor && validation.usedColors.length < colorPalette.length && <p className={styles.centeredText}>All {validation.numberOfColors} colors are in use. The other colors are disabled.</p>}
             {!validation.isValid && <ConfigIssues id="config-issues" wrongColors={validation.wrongColors} incompleteTubes={validation.incompleteTubes} />}
             {isSolving
-              ? <Spinner label="Solving..." />
+              ? <Spinner label="Solving..." onCancel={canCancel ? stopSolving : undefined} />
               : <button className={styles.button} disabled={!validation.isValid} aria-describedby={validation.isValid ? undefined : "config-issues"} onClick={solvePuzzle}>SOLVE</button>}
           </>
         )
