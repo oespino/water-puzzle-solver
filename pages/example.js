@@ -1,4 +1,4 @@
-import Head from 'next/head'
+import Seo from '../components/seo'
 import Tube from '../components/tube'
 import State from '../components/state'
 import Solution from '../components/solution'
@@ -87,11 +87,12 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
-      <Head>
-        <title>Water Sort Puzzle Solver</title>
-        <meta name="description" content="Web app to solve these tricky puzzles and laugh at your friends" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+      <Seo
+        title="Component examples - Water Sort Puzzle Solver"
+        description="Preview page for the tube, state and solution components of Water Sort Puzzle Solver."
+        path="/example"
+        noindex
+      />
 
       <main className={styles.main}>
 

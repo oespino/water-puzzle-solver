@@ -1,4 +1,3 @@
-import Head from 'next/head'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react';
 import State from '../components/state'
@@ -7,6 +6,7 @@ import Selector from '../components/selector'
 import ColorSelector from '../components/colorSelector'
 import ConfigIssues from '../components/configIssues'
 import Spinner from '../components/spinner'
+import Seo from '../components/seo'
 import styles from '../styles/Home.module.css'
 import stateLib from '../lib/states'
 import colorPalette from '../lib/colors'
@@ -138,11 +138,10 @@ export default function Home() {
   }
   return (
     <div className={styles.container}>
-      <Head>
-        <title>Water Sort Puzzle Solver</title>
-        <meta name="description" content="Web app to solve these tricky puzzles and laugh at your friends" />
-        <link rel="icon" href="/logo.webp" />
-      </Head>
+      <Seo
+        title="Water Sort Puzzle Solver - Solve any level step by step"
+        description="Free online Water Sort Puzzle solver. Enter your tubes and colors and get the step-by-step solution instantly."
+      />
 
       <main className={styles.main}>
         <PageComponent />
