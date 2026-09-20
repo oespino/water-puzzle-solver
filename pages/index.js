@@ -5,6 +5,7 @@ import State from '../components/state'
 import Solution from '../components/solution'
 import Selector from '../components/selector'
 import ColorSelector from '../components/colorSelector'
+import ConfigIssues from '../components/configIssues'
 import styles from '../styles/Home.module.css'
 import stateLib from '../lib/states'
 
@@ -60,6 +61,8 @@ export default function Home() {
     setPageStatus(PAGE_STATUSES.COLOR_INPUT)
   }
 
+  const validation = stateLib.validateConfiguration(tubes, emptyNumber)
+
   function PageComponent() {
     switch (pageStatus) {
       case PAGE_STATUSES.NUMBER_INPUT:
@@ -82,7 +85,8 @@ export default function Home() {
             </div>
             <State tubes={tubes} numberOfReadOnly={emptyNumber} colorSelected={color} onClick={handleClick} />
             <ColorSelector colorSelected={color} selectColor={setColor} />
-            < button className={styles.button} onClick={solvePuzzle}>SOLVE</button>
+            {!validation.isValid && <ConfigIssues id="config-issues" wrongColors={validation.wrongColors} incompleteTubes={validation.incompleteTubes} />}
+            <button className={styles.button} disabled={!validation.isValid} aria-describedby={validation.isValid ? undefined : "config-issues"} onClick={solvePuzzle}>SOLVE</button>
           </>
         )
       case PAGE_STATUSES.SOLUTION_OUTPUT:
