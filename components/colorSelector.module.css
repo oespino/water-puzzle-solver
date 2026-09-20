@@ -11,6 +11,11 @@
   margin: 5px;
 }
 
+.button:disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+}
+
 .buttonSelected {
   width: 45px;
   height: 45px;
