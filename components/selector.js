@@ -31,10 +31,10 @@ function validate(totalText, emptyText) {
     return { total, empty, errors, isValid }
 }
 
-export default function Selector({ onClick }) {
+export default function Selector({ onClick, initialTotal = '', initialEmpty = '' }) {
 
-    const [totalText, setTotalText] = useState('')
-    const [emptyText, setEmptyText] = useState('')
+    const [totalText, setTotalText] = useState(String(initialTotal))
+    const [emptyText, setEmptyText] = useState(String(initialEmpty))
     const baseId = useId()
 
     const { total, empty, errors, isValid } = validate(totalText, emptyText)

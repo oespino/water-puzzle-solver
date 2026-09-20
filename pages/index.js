@@ -40,15 +40,14 @@ export default function Home() {
   }, [])
 
 
-  const setNumberOfTubes = function (totalNumber, emptyNumber) {
-    setTotalNumber(totalNumber)
-    setEmptyNumber(emptyNumber)
-    const localTubes = []
-    for (let i = 0; i < totalNumber; i++) {
-      localTubes.push([])
+  const setNumberOfTubes = function (total, empty) {
+    const isUnchanged = total === totalNumber && empty === emptyNumber && tubes.length === total
+    setTotalNumber(total)
+    setEmptyNumber(empty)
+    if (!isUnchanged) {
+      setTubes(Array.from({ length: total }, () => []))
+      setUndoStack([])
     }
-    setTubes(localTubes)
-    setUndoStack([])
     setPageStatus(PAGE_STATUSES.COLOR_INPUT)
   }
 
@@ -102,11 +101,29 @@ export default function Home() {
     worker.postMessage(tubes)
   }
 
-  const backToStart = function () {
+  const backToColors = function () {
     setPageStatus(PAGE_STATUSES.COLOR_INPUT)
   }
 
+  const backToConfig = function () {
+    setPageStatus(PAGE_STATUSES.NUMBER_INPUT)
+  }
+
+  const newLevel = function () {
+    setTubes([])
+    setUndoStack([])
+    setColor(TOOLS.REMOVE)
+    setPageStatus(PAGE_STATUSES.NUMBER_INPUT)
+  }
+
   const validation = stateLib.validateConfiguration(tubes, emptyNumber)
+
+  const endButtons = (
+    <div className={styles.navButtons}>
+      <button className={styles.secondaryButton} onClick={backToColors}>BACK</button>
+      <button className={styles.button} onClick={newLevel}>NEW LEVEL</button>
+    </div>
+  )
 
   function PageComponent() {
     switch (pageStatus) {
@@ -119,7 +136,7 @@ export default function Home() {
               height={100}
             ></Image>
             <h1>Configure game settings</h1>
-            <Selector onClick={setNumberOfTubes} />
+            <Selector onClick={setNumberOfTubes} initialTotal={totalNumber} initialEmpty={emptyNumber} />
           </>
         )
       case PAGE_STATUSES.COLOR_INPUT:
@@ -134,21 +151,26 @@ export default function Home() {
             {!validation.isValid && <ConfigIssues id="config-issues" wrongColors={validation.wrongColors} incompleteTubes={validation.incompleteTubes} />}
             {isSolving
               ? <Spinner label="Solving..." onCancel={canCancel ? stopSolving : undefined} />
-              : <button className={styles.button} disabled={!validation.isValid} aria-describedby={validation.isValid ? undefined : "config-issues"} onClick={solvePuzzle}>SOLVE</button>}
+              : (
+                <div className={styles.navButtons}>
+                  <button className={styles.secondaryButton} onClick={backToConfig}>BACK</button>
+                  <button className={styles.button} disabled={!validation.isValid} aria-describedby={validation.isValid ? undefined : "config-issues"} onClick={solvePuzzle}>SOLVE</button>
+                </div>
+              )}
           </>
         )
       case PAGE_STATUSES.SOLUTION_OUTPUT:
         return (
           <>
             <Solution history={history} />
-            <button className={styles.button} onClick={() => backToStart()}>CLOSE</button>
+            {endButtons}
           </>
         )
       case PAGE_STATUSES.SOLUTION_NOT_FOUND:
         return (
           <>
             <h2 className={styles.centeredText}>Solution not found. Check your colors.</h2>
-            <button className={styles.button} onClick={() => backToStart()}>BACK</button>
+            {endButtons}
           </>
         )
     }

@@ -55,6 +55,30 @@
   cursor: not-allowed;
 }
 
+.secondaryButton {
+  font-size: x-large;
+  font-weight: bold;
+  border-radius: 15px;
+  border: 3px solid #888;
+  background-color: transparent;
+  color: white;
+  padding: 7px 20px;
+  cursor: pointer;
+}
+
+.secondaryButton:hover {
+  border-color: white;
+}
+
+.navButtons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
 .footer {
   width: 100%;
   height: 100px;
