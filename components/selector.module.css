@@ -15,14 +15,40 @@
   width: 80px;
 }
 
-.button:active {
+.button:active:not(:disabled) {
   box-shadow: 0 1px darkgoldenrod;
   transform: translateY(4px);
+}
+
+.button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
 }
 
 .input {
   font-size: x-large;
   margin: 10px;
-  width: 40px;
+  width: 80px;
   text-align: center;
+}
+
+.inputInvalid {
+  font-size: x-large;
+  margin: 10px;
+  width: 80px;
+  text-align: center;
+  outline: 3px solid #ff8a80;
+}
+
+.error {
+  margin: 0 10px 6px;
+  text-align: center;
+  color: #ff8a80;
 }
