@@ -4,7 +4,7 @@ import State from '../components/state'
 import Solution from '../components/solution'
 import Selector from '../components/selector'
 import styles from '../styles/Home.module.css'
-import stateLib from '../lib/states'
+import { solve } from '../lib/solver'
 
 export default function Home() {
 
@@ -44,16 +44,7 @@ export default function Home() {
     return tube.map((number) => colors[number - 1])
   })
 
-  console.log(tubes2)
-
-  let history = [];
-  history.push(tubes2)
-
-  let { stackI, stackJ } = stateLib.resolve(history)
-
-  //console.log(history)
-  console.log(stackI)
-  console.log(stackJ)
+  const { history } = solve(tubes2)
 
   let tubeExample = ['red', 'blue', 'blue', 'blue']
   let stateExample = [

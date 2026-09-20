@@ -20,7 +20,8 @@ export default function Home() {
     NUMBER_INPUT: 0,
     COLOR_INPUT: 1,
     SOLUTION_OUTPUT: 2,
-    SOLUTION_NOT_FOUND: 3
+    SOLUTION_NOT_FOUND: 3,
+    SOLUTION_GAVE_UP: 4
   }
   const [totalNumber, setTotalNumber] = useState('')
   const [emptyNumber, setEmptyNumber] = useState('')
@@ -88,12 +89,12 @@ export default function Home() {
     const worker = new Worker(new URL('../lib/solver.worker.js', import.meta.url))
     workerRef.current = worker
     worker.onmessage = (event) => {
-      const historyLocal = event.data
-      if (!historyLocal.length) {
-        setPageStatus(PAGE_STATUSES.SOLUTION_NOT_FOUND)
-      } else {
-        setHistory(historyLocal)
+      const { status, history: solution } = event.data
+      if (status === 'solved') {
+        setHistory(solution)
         setPageStatus(PAGE_STATUSES.SOLUTION_OUTPUT)
+      } else {
+        setPageStatus(status === 'gave-up' ? PAGE_STATUSES.SOLUTION_GAVE_UP : PAGE_STATUSES.SOLUTION_NOT_FOUND)
       }
       stopSolving()
     }
@@ -170,6 +171,13 @@ export default function Home() {
         return (
           <>
             <h2 className={styles.centeredText}>Solution not found. Check your colors.</h2>
+            {endButtons}
+          </>
+        )
+      case PAGE_STATUSES.SOLUTION_GAVE_UP:
+        return (
+          <>
+            <h2 className={styles.centeredText}>The solver could not finish this puzzle. Check your colors and try again.</h2>
             {endButtons}
           </>
         )
