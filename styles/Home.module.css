@@ -1,5 +1,5 @@
 .container {
-  min-height: 100vh;
+  min-height: 100dvh;
   padding: 0 0.5rem;
   display: flex;
   flex-direction: column;
@@ -44,9 +44,14 @@
   padding: 10px 20px;
 }
 
-.button:active {
+.button:active:not(:disabled) {
   box-shadow: 0 1px darkgoldenrod;
   transform: translateY(4px);
+}
+
+.button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .footer {

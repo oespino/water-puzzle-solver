@@ -89,19 +89,19 @@ export default function Home() {
     <div className={styles.container}>
       <Head>
         <title>Water Sort Puzzle Solver</title>
-        <meta name="description" content="Webapp to solve these tricky puzzles and laught at your friends" />
+        <meta name="description" content="Web app to solve these tricky puzzles and laugh at your friends" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className={styles.main}>
 
-        <h1>Ejemplo de Tubo</h1>
+        <h1>Tube example</h1>
         <Tube colors={tubeExample} />
 
-        <h1>Ejemplo de Estado</h1>
+        <h1>State example</h1>
         <State tubes={stateExample} />
 
-        <h1>Ejemplo de Solución</h1>
+        <h1>Solution example</h1>
         <Solution history={history} />
 
       </main>

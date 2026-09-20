@@ -1,0 +1,37 @@
+.container {
+  width: 100%;
+  margin: 10px 0;
+  text-align: center;
+}
+
+.text {
+  margin: 6px 0;
+  font-size: 1rem;
+}
+
+.chips {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid #ffb454;
+  border-radius: 999px;
+  font-size: 0.9rem;
+}
+
+.swatch {
+  width: 14px;
+  height: 14px;
+  border: 1px solid white;
+  border-radius: 50%;
+}

@@ -1,6 +1,37 @@
 .tube {
   display: flex;
   flex-direction: column-reverse;
+  position: relative;
+}
+
+.from {
+  filter: drop-shadow(0 0 3px #c44600) drop-shadow(0 0 3px #c44600);
+}
+
+.to {
+  filter: drop-shadow(0 0 3px #0b6bcb) drop-shadow(0 0 3px #0b6bcb);
+}
+
+.badge {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-size: 0.65rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: white;
+  white-space: nowrap;
+}
+
+.from .badge {
+  background-color: #c44600;
+}
+
+.to .badge {
+  background-color: #0b6bcb;
 }
 
 .middle {
