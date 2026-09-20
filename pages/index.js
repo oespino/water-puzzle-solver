@@ -13,6 +13,7 @@ import colorPalette from '../lib/colors'
 import { TOOLS } from '../lib/tools'
 
 const CANCEL_DELAY_MS = 5000
+const UNDO_LIMIT = 20
 
 export default function Home() {
   const PAGE_STATUSES = {
@@ -25,7 +26,7 @@ export default function Home() {
   const [emptyNumber, setEmptyNumber] = useState('')
   const [color, setColor] = useState(TOOLS.REMOVE)
   const [tubes, setTubes] = useState([])
-  const [undoSnapshot, setUndoSnapshot] = useState(null)
+  const [undoStack, setUndoStack] = useState([])
   const [history, setHistory] = useState([])
   const [pageStatus, setPageStatus] = useState(PAGE_STATUSES.NUMBER_INPUT)
   const [isSolving, setIsSolving] = useState(false)
@@ -47,7 +48,7 @@ export default function Home() {
       localTubes.push([])
     }
     setTubes(localTubes)
-    setUndoSnapshot(null)
+    setUndoStack([])
     setPageStatus(PAGE_STATUSES.COLOR_INPUT)
   }
 
@@ -65,13 +66,13 @@ export default function Home() {
       if (tube.length >= 4 || !isColorAllowed) return
       tube.push(selection)
     }
-    setUndoSnapshot(tubes)
+    setUndoStack([...undoStack, tubes].slice(-UNDO_LIMIT))
     setTubes(tubesCopy)
   }
 
   const undo = function () {
-    setTubes(undoSnapshot)
-    setUndoSnapshot(null)
+    setTubes(undoStack[undoStack.length - 1])
+    setUndoStack(undoStack.slice(0, -1))
   }
 
   const stopSolving = function () {
@@ -128,7 +129,7 @@ export default function Home() {
               <h1>Use the colors to fill the tubes until they look like your puzzle</h1>
             </div>
             <State tubes={tubes} numberOfReadOnly={emptyNumber} colorSelected={color} onClick={handleClick} />
-            <ColorSelector colorSelected={color} selectColor={setColor} usedColors={validation.usedColors} canAddNewColor={validation.canAddNewColor} canUndo={!!undoSnapshot} onUndo={undo} />
+            <ColorSelector colorSelected={color} selectColor={setColor} usedColors={validation.usedColors} canAddNewColor={validation.canAddNewColor} canUndo={undoStack.length > 0} onUndo={undo} />
             {!validation.canAddNewColor && validation.usedColors.length < colorPalette.length && <p className={styles.centeredText}>All {validation.numberOfColors} colors are in use. The other colors are disabled.</p>}
             {!validation.isValid && <ConfigIssues id="config-issues" wrongColors={validation.wrongColors} incompleteTubes={validation.incompleteTubes} />}
             {isSolving
