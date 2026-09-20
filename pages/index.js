@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import Image from 'next/image'
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import State from '../components/state'
 import Solution from '../components/solution'
 import Selector from '../components/selector'
@@ -25,6 +25,9 @@ export default function Home() {
   const [history, setHistory] = useState([])
   const [pageStatus, setPageStatus] = useState(PAGE_STATUSES.NUMBER_INPUT)
   const [isSolving, setIsSolving] = useState(false)
+  const workerRef = useRef(null)
+
+  useEffect(() => () => workerRef.current?.terminate(), [])
 
 
   const setNumberOfTubes = function (totalNumber, emptyNumber) {
@@ -50,22 +53,25 @@ export default function Home() {
 
   const solvePuzzle = function () {
     setIsSolving(true)
-    // The solver blocks the main thread, so wait for a frame to be painted with the spinner first
-    requestAnimationFrame(() => setTimeout(() => {
-      try {
-        let historyLocal = []
-        historyLocal.push(tubes)
-        stateLib.resolve(historyLocal)
-        if (!historyLocal.length) {
-          setPageStatus(PAGE_STATUSES.SOLUTION_NOT_FOUND)
-        } else {
-          setHistory(historyLocal)
-          setPageStatus(PAGE_STATUSES.SOLUTION_OUTPUT)
-        }
-      } finally {
-        setIsSolving(false)
+    const worker = new Worker(new URL('../lib/solver.worker.js', import.meta.url))
+    workerRef.current = worker
+    const finish = () => {
+      worker.terminate()
+      workerRef.current = null
+      setIsSolving(false)
+    }
+    worker.onmessage = (event) => {
+      const historyLocal = event.data
+      if (!historyLocal.length) {
+        setPageStatus(PAGE_STATUSES.SOLUTION_NOT_FOUND)
+      } else {
+        setHistory(historyLocal)
+        setPageStatus(PAGE_STATUSES.SOLUTION_OUTPUT)
       }
-    }))
+      finish()
+    }
+    worker.onerror = finish
+    worker.postMessage(tubes)
   }
 
   const backToStart = function () {
