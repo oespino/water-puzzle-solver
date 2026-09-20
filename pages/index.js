@@ -157,7 +157,7 @@ export default function Home() {
     </div>
   )
 
-  function PageComponent() {
+  const renderScreen = function () {
     switch (pageStatus) {
       case PAGE_STATUSES.NUMBER_INPUT:
         return (
@@ -222,7 +222,7 @@ export default function Home() {
       />
 
       <main className={styles.main}>
-        <PageComponent />
+        {renderScreen()}
       </main>
     </div>
   )
