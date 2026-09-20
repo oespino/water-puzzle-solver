@@ -1,10 +1,10 @@
 import styles from './state.module.css'
 import Tube from './tube'
 
-export default function State({ tubes, numberOfReadOnly, colorSelected, onClick }) {
+export default function State({ tubes, numberOfReadOnly, colorSelected, onClick, highlights }) {
 
     const handleClick = function (index) {
-        onClick(index, colorSelected)
+        if (onClick) onClick(index, colorSelected)
     }
 
     return (
@@ -12,7 +12,7 @@ export default function State({ tubes, numberOfReadOnly, colorSelected, onClick 
             {tubes.map((el, index) => {
                 return (
                     <div key={index} className={styles.tube}>
-                        <Tube colors={el} readonly={index >= tubes.length - numberOfReadOnly} onClick={() => handleClick(index)} />
+                        <Tube colors={el} readonly={index >= tubes.length - numberOfReadOnly} onClick={() => handleClick(index)} highlight={highlights && highlights[index]} />
                     </div>
                 )
             })}
