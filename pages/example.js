@@ -2,7 +2,6 @@ import Seo from '../components/seo'
 import Tube from '../components/tube'
 import State from '../components/state'
 import Solution from '../components/solution'
-import Selector from '../components/selector'
 import styles from '../styles/Home.module.css'
 import { solve } from '../lib/solver'
 
@@ -54,28 +53,6 @@ export default function Home() {
     [],
     []
   ]
-  let stateExample2 = [
-    ['red', 'blue', 'blue', 'blue'],
-    ['red', 'green', 'green', 'green'],
-    ['green', 'red', 'blue'],
-    ['red'],
-    []
-  ]
-  let stateExample3 = [
-    ['red', 'blue', 'blue', 'blue'],
-    ['red'],
-    ['green', 'red', 'blue'],
-    ['red'],
-    ['green', 'green', 'green']
-  ]
-
-
-  let historyExample = [
-    stateExample,
-    stateExample2,
-    stateExample3
-  ]
-
   return (
     <div className={styles.container}>
       <Seo
