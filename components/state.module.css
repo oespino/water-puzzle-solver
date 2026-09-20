@@ -1,14 +1,18 @@
 .container {
   display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
+  flex-direction: column;
   width: 100%;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
 }
 
 .tube {
   display: flex;
   justify-content: center;
   min-width: 30px;
-  width: calc(100% / 7);
+  width: calc(100% / var(--columns));
   margin: 20px 0;
 }
